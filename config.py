@@ -40,7 +40,7 @@ COOKIE_FILE_PATH: str = os.getenv("COOKIE_FILE_PATH", str(_project_dir / "cookie
 # ---------------------------------------------------------------------------
 # Gemini API Settings
 # ---------------------------------------------------------------------------
-GEMINI_MODEL: str = "gemini-2.5-flash"
+GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
 GEMINI_TEMPERATURE: float = 0.3  # Low temp for factual extraction
 GEMINI_MAX_OUTPUT_TOKENS: int = 2000
 API_DELAY_SECONDS: float = 4.0  # Delay between Gemini calls (free tier: 10-15 RPM)
