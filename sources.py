@@ -28,12 +28,12 @@ logger = logging.getLogger("youtube_second_brain")
 # ---------------------------------------------------------------------------
 # Core yt-dlp extraction helpers
 # ---------------------------------------------------------------------------
-def _get_ydl_opts(limit: int | None = None) -> dict[str, Any]:
+def _get_ydl_opts(limit: int | None = None, use_cookies: bool = True) -> dict[str, Any]:
     """
-    Builds the base yt-dlp options dict with cookie authentication.
+    Builds the base yt-dlp options dict with optional cookie authentication.
 
-    Uses cookies.txt file if available, falls back to browser cookie
-    extraction if BROWSER_FALLBACK is configured.
+    Uses cookies.txt file if available and use_cookies is True, falls back to
+    browser cookie extraction if BROWSER_FALLBACK is configured.
     """
     opts: dict[str, Any] = {
         "extract_flat": "in_playlist",  # Fast: metadata only, no stream resolution
@@ -46,23 +46,29 @@ def _get_ydl_opts(limit: int | None = None) -> dict[str, Any]:
     if limit:
         opts["playlist_items"] = f"1:{limit}"
 
-    # Authentication: prefer cookies.txt, fall back to browser
-    cookie_path = Path(config.COOKIE_FILE_PATH)
-    if cookie_path.is_file():
-        opts["cookiefile"] = str(cookie_path)
-    elif config.BROWSER_FALLBACK:
-        # Must be a tuple! ('chrome',) not 'chrome'
-        opts["cookiesfrombrowser"] = (config.BROWSER_FALLBACK,)
-    else:
-        logger.warning(
-            "No cookies.txt found and no BROWSER_FALLBACK set. "
-            "Private sources (history, Watch Later) will fail."
-        )
+    if use_cookies:
+        # Authentication: prefer cookies.txt, fall back to browser
+        cookie_path = Path(config.COOKIE_FILE_PATH)
+        if cookie_path.is_file():
+            opts["cookiefile"] = str(cookie_path)
+        elif config.BROWSER_FALLBACK:
+            # Must be a tuple! ('chrome',) not 'chrome'
+            opts["cookiesfrombrowser"] = (config.BROWSER_FALLBACK,)
+        else:
+            logger.warning(
+                "No cookies.txt found and no BROWSER_FALLBACK set. "
+                "Private sources (history, Watch Later) will fail."
+            )
 
     return opts
 
 
-def _extract_videos(url: str, source_label: str, limit: int | None = None) -> list[VideoMeta]:
+def _extract_videos(
+    url: str,
+    source_label: str,
+    limit: int | None = None,
+    use_cookies: bool = True,
+) -> list[VideoMeta]:
     """
     Extracts video metadata from a YouTube URL using yt-dlp.
 
@@ -70,11 +76,12 @@ def _extract_videos(url: str, source_label: str, limit: int | None = None) -> li
         url: YouTube URL (history feed, playlist URL, or yt-dlp shortcut).
         source_label: Label for the source ('history', 'playlist', 'watch_later').
         limit: Maximum number of videos to extract.
+        use_cookies: Whether to attach cookies if available.
 
     Returns:
         List of VideoMeta objects.
     """
-    opts = _get_ydl_opts(limit=limit)
+    opts = _get_ydl_opts(limit=limit, use_cookies=use_cookies)
     videos: list[VideoMeta] = []
 
     try:
@@ -134,19 +141,37 @@ def fetch_watch_history() -> list[VideoMeta]:
         url=":ythistory",
         source_label="history",
         limit=config.HISTORY_LIMIT,
+        use_cookies=True,
     )
 
 
 def fetch_second_brain_playlist() -> list[VideoMeta]:
     """Fetches videos from the 'Second Brain Queue' playlist."""
-    playlist_id = config.SECOND_BRAIN_PLAYLIST_ID
-    if not playlist_id:
+    raw_id = (config.SECOND_BRAIN_PLAYLIST_ID or "").strip().strip('"\'')
+    if not raw_id:
         logger.info("[playlist] No SECOND_BRAIN_PLAYLIST_ID configured, skipping.")
         return []
 
+    # If user provided a full URL, extract the playlist ID
+    if "list=" in raw_id:
+        import urllib.parse
+        parsed = urllib.parse.urlparse(raw_id)
+        params = urllib.parse.parse_qs(parsed.query)
+        playlist_id = params.get("list", [raw_id])[0]
+    else:
+        playlist_id = raw_id
+
     logger.info(f"Fetching 'Second Brain Queue' playlist ({playlist_id})...")
     url = f"https://www.youtube.com/playlist?list={playlist_id}"
-    return _extract_videos(url=url, source_label="playlist")
+
+    # First try with cookies if available
+    videos = _extract_videos(url=url, source_label="playlist", use_cookies=True)
+    # If no data returned (e.g. cookies blocked by datacenter or invalid), retry without cookies
+    if not videos and _has_auth():
+        logger.info("[playlist] Retrying playlist extraction without cookies...")
+        videos = _extract_videos(url=url, source_label="playlist", use_cookies=False)
+
+    return videos
 
 
 def fetch_watch_later() -> list[VideoMeta]:

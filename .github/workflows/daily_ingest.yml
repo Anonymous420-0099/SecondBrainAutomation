@@ -34,12 +34,29 @@ jobs:
       - name: Restore YouTube Cookies (if provided)
         shell: bash
         run: |
-          if [ -n "$YOUTUBE_COOKIES" ]; then
-            echo "$YOUTUBE_COOKIES" > cookies.txt
-            echo "cookies.txt restored from secret."
-          else
-            echo "No YOUTUBE_COOKIES secret found. Proceeding with playlist ingestion."
-          fi
+          python -c '
+          import os, re
+          raw = os.getenv("YOUTUBE_COOKIES", "").strip()
+          if raw:
+              cleaned = []
+              for line in raw.splitlines():
+                  line = line.strip()
+                  if not line:
+                      continue
+                  if line.startswith("#"):
+                      cleaned.append(line)
+                  else:
+                      parts = re.split(r"\s+", line)
+                      if len(parts) >= 7:
+                          cleaned.append("\t".join(parts[:7]))
+                      else:
+                          cleaned.append(line)
+              with open("cookies.txt", "w", encoding="utf-8") as f:
+                  f.write("\n".join(cleaned) + "\n")
+              print(f"cookies.txt restored and formatted ({len(cleaned)} lines).")
+          else:
+              print("No YOUTUBE_COOKIES secret found. Proceeding with playlist ingestion.")
+          '
         env:
           YOUTUBE_COOKIES: ${{ secrets.YOUTUBE_COOKIES }}
 
