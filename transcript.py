@@ -11,6 +11,9 @@ import logging
 import random
 import time
 
+import http.cookiejar
+from pathlib import Path
+import requests
 from youtube_transcript_api import (
     YouTubeTranscriptApi,
     TranscriptsDisabled,
@@ -21,6 +24,28 @@ from youtube_transcript_api import (
 import config
 
 logger = logging.getLogger("youtube_second_brain")
+
+
+def _get_transcript_api() -> YouTubeTranscriptApi:
+    """Creates a YouTubeTranscriptApi instance, with session cookies if available."""
+    cookie_path = Path(config.COOKIE_FILE_PATH)
+    if cookie_path.is_file():
+        try:
+            session = requests.Session()
+            session.headers.update({
+                "User-Agent": (
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/124.0.0.0 Safari/537.36"
+                )
+            })
+            cj = http.cookiejar.MozillaCookieJar(str(cookie_path))
+            cj.load(ignore_discard=True, ignore_expires=True)
+            session.cookies = cj
+            return YouTubeTranscriptApi(http_client=session)
+        except Exception as e:
+            logger.warning(f"[transcript] Could not load cookies for transcript API: {e}")
+    return YouTubeTranscriptApi()
 
 
 def fetch_transcript(video_id: str) -> str | None:
@@ -36,7 +61,7 @@ def fetch_transcript(video_id: str) -> str | None:
     Returns:
         Full transcript as a single string, or None if unavailable.
     """
-    ytt_api = YouTubeTranscriptApi()
+    ytt_api = _get_transcript_api()
 
     # --- Attempt 1: Direct fetch with preferred languages ---
     try:
