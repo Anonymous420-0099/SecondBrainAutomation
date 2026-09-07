@@ -127,12 +127,97 @@ def fetch_transcript(video_id: str) -> str | None:
             full_text = " ".join([snippet.text for snippet in fetched])
             return _truncate_if_needed(full_text)
 
-        logger.warning(f"[transcript] No transcript tracks available for {video_id}")
-        return None
+        logger.warning(f"[transcript] No transcript tracks available via API for {video_id}")
 
     except Exception as e:
-        logger.error(f"[transcript] Fallback failed for {video_id}: {e}")
-        return None
+        logger.warning(f"[transcript] youtube-transcript-api failed for {video_id}: {e}")
+
+    # --- Attempt 3: yt-dlp subtitle extraction fallback (bypasses datacenter IP bans) ---
+    logger.info(f"[transcript] Trying yt-dlp subtitle extraction fallback for {video_id}...")
+    ytdlp_text = _fetch_transcript_via_ytdlp(video_id)
+    if ytdlp_text:
+        return ytdlp_text
+
+    return None
+
+
+def _fetch_transcript_via_ytdlp(video_id: str) -> str | None:
+    """
+    Fallback subtitle extraction using yt-dlp.
+    Downloads auto-generated or manual VTT subtitles to a temporary directory
+    and parses the plain text. Works reliably in cloud environments where
+    direct youtube-transcript-api requests are throttled or IP-blocked.
+    """
+    import glob
+    import os
+    import re
+    import tempfile
+    import yt_dlp
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        ydl_opts: dict = {
+            "skip_download": True,
+            "writesubtitles": True,
+            "writeautomaticsub": True,
+            "subtitleslangs": list(config.TRANSCRIPT_LANGUAGES) + ["en", "hi", "ur"],
+            "subtitlesformat": "vtt",
+            "outtmpl": os.path.join(tmpdir, "%(id)s.%(ext)s"),
+            "quiet": True,
+            "no_warnings": True,
+        }
+
+        cookie_path = Path(config.COOKIE_FILE_PATH)
+        if cookie_path.is_file():
+            ydl_opts["cookiefile"] = str(cookie_path)
+
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([f"https://www.youtube.com/watch?v={video_id}"])
+
+            vtt_files = glob.glob(os.path.join(tmpdir, "*.vtt"))
+            if not vtt_files:
+                logger.warning(f"[transcript] yt-dlp found no subtitles for {video_id}")
+                return None
+
+            # Prefer preferred languages
+            target_file = vtt_files[0]
+            for lang in config.TRANSCRIPT_LANGUAGES:
+                matched = [f for f in vtt_files if f".{lang}." in f]
+                if matched:
+                    target_file = matched[0]
+                    break
+
+            with open(target_file, "r", encoding="utf-8", errors="replace") as f:
+                lines = f.readlines()
+
+            clean_lines: list[str] = []
+            for line in lines:
+                line = line.strip()
+                if (
+                    not line
+                    or "-->" in line
+                    or line.startswith("WEBVTT")
+                    or line.startswith("Kind:")
+                    or line.startswith("Language:")
+                ):
+                    continue
+                # Strip inline HTML-like timestamps/tags
+                line = re.sub(r"<[^>]+>", "", line).strip()
+                if line and (not clean_lines or clean_lines[-1] != line):
+                    clean_lines.append(line)
+
+            full_text = " ".join(clean_lines)
+            if full_text:
+                logger.info(
+                    f"[transcript] Successfully extracted via yt-dlp for {video_id} "
+                    f"({len(full_text.split())} words)"
+                )
+                return _truncate_if_needed(full_text)
+
+        except Exception as e:
+            logger.warning(f"[transcript] yt-dlp subtitle extraction failed for {video_id}: {e}")
+
+    return None
 
 
 def _truncate_if_needed(text: str) -> str:
