@@ -1,0 +1,12 @@
+[
+  {
+    "video_id": "kCc8FmEb1nY",
+    "title": "Test Video (kCc8FmEb1nY)",
+    "channel": "Unknown",
+    "category": "AI Systems",
+    "summary": "Andrej Karpathy demonstrates how to build, train, and scale a decoder-only Transformer language model from scratch in PyTorch, breaking down the underlying mathematics of self-attention, residual connections, and layer normalization.",
+    "processed_at": "2026-09-07T10:58:59Z",
+    "url": "https://www.youtube.com/watch?v=kCc8FmEb1nY",
+    "note_path": "notes/2026/09/2026-09-07-test-video-kcc8fmeb1ny.md"
+  }
+]
