@@ -60,13 +60,48 @@ jobs:
         env:
           YOUTUBE_COOKIES: ${{ secrets.YOUTUBE_COOKIES }}
 
-      - name: Run Ingestion Pipeline
+      - name: Pre-flight Diagnostics
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           SECOND_BRAIN_PLAYLIST_ID: ${{ secrets.SECOND_BRAIN_PLAYLIST_ID }}
           CI: "true"
         run: |
-          python main.py
+          python -c "
+          import os
+          key = os.getenv('GEMINI_API_KEY', '')
+          pid = os.getenv('SECOND_BRAIN_PLAYLIST_ID', '')
+          print('=== PRE-FLIGHT DIAGNOSTICS ===')
+          print(f'GEMINI_API_KEY set: {bool(key)} (length: {len(key)})')
+          print(f'SECOND_BRAIN_PLAYLIST_ID set: {bool(pid)} (value: {pid})')
+          print(f'CI mode: {os.getenv(\"CI\", \"\")}')
+          print(f'cookies.txt exists: {os.path.isfile(\"cookies.txt\")}')
+          print(f'processed_videos.json exists: {os.path.isfile(\"processed_videos.json\")}')
+          if os.path.isfile('processed_videos.json'):
+              import json
+              with open('processed_videos.json') as f:
+                  data = json.load(f)
+              print(f'Already processed video IDs: {len(data)}')
+              for vid_id in list(data.keys())[:10]:
+                  print(f'  - {vid_id}')
+          print('=== END DIAGNOSTICS ===')
+          "
+
+      - name: Run Ingestion Pipeline
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SECOND_BRAIN_PLAYLIST_ID: ${{ secrets.SECOND_BRAIN_PLAYLIST_ID }}
+          CI: "true"
+          PYTHONIOENCODING: "utf-8"
+        run: |
+          python main.py 2>&1 | tee pipeline_output.log
+          echo "--- Pipeline exit code: $? ---"
+
+      - name: Show Pipeline Log (Debug)
+        if: always()
+        run: |
+          echo "=== FULL PIPELINE OUTPUT ==="
+          cat pipeline_output.log || echo "No pipeline log found"
+          echo "=== END OUTPUT ==="
 
       - name: Commit and Push Changes (Notes & Index)
         shell: bash

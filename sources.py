@@ -266,18 +266,25 @@ def fetch_all_new_videos() -> list[VideoMeta]:
     all_videos: list[VideoMeta] = []
 
     # Source A: Watch History
-    all_videos.extend(fetch_watch_history())
+    history_videos = fetch_watch_history()
+    all_videos.extend(history_videos)
 
     # Source B: Second Brain Queue playlist
-    all_videos.extend(fetch_second_brain_playlist())
+    playlist_videos = fetch_second_brain_playlist()
+    all_videos.extend(playlist_videos)
 
     # Source C: Watch Later
-    all_videos.extend(fetch_watch_later())
+    wl_videos = fetch_watch_later()
+    all_videos.extend(wl_videos)
 
-    logger.info(f"Total videos fetched from all sources: {len(all_videos)}")
+    logger.info(f"=== Source Results ===")
+    logger.info(f"  Watch History:     {len(history_videos)} videos")
+    logger.info(f"  Second Brain Queue: {len(playlist_videos)} videos")
+    logger.info(f"  Watch Later:       {len(wl_videos)} videos")
+    logger.info(f"  Total:             {len(all_videos)} videos")
 
     # Remove duplicates and already-processed videos
     new_videos = deduplicate(all_videos)
-    logger.info(f"New videos to process: {len(new_videos)}")
+    logger.info(f"New videos to process (after dedup): {len(new_videos)}")
 
     return new_videos

@@ -247,6 +247,12 @@ def run_full_pipeline(dry_run: bool, skip_filter: bool) -> None:
 
     if not new_videos:
         logger.info("📭 No new videos to process. Exiting.")
+        logger.info("   This could mean:")
+        logger.info("   - All playlist videos were already processed")
+        logger.info("   - The playlist is empty or inaccessible")
+        logger.info("   - No SECOND_BRAIN_PLAYLIST_ID is configured")
+        logger.info(f"   SECOND_BRAIN_PLAYLIST_ID = '{config.SECOND_BRAIN_PLAYLIST_ID}'")
+        logger.info(f"   CI_MODE = {config.CI_MODE}")
         return
 
     # --- Process each video ---
