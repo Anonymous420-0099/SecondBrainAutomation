@@ -1,0 +1,31 @@
+# The Secret To Generating 30 AI Videos Per Hour For TikTok Shop
+
+- **Channel:** ducrez
+- **URL:** https://www.youtube.com/watch?v=IKADy4h4_2o
+- **Category:** Startups & Business
+- **Processed:** 2026-09-09
+
+## Summary
+Scaling TikTok Shop revenue requires moving beyond manual video creation by automating high-volume bottom-of-the-funnel AI content production and delegating tasks through a structured VA hierarchy.
+
+## Key Takeaways
+- Focus on bottom-of-the-funnel (BOFU) content: Create short 5-15 second videos for users who already know the product, driving high Click-Through Rates (CTR) to capture TikTok's GMV Max automated ad spend.
+- Apply strict product research criteria: Filter for products with over 10% commission, under 200-300 competing creators, and at least 70% of top videos actively backed by ad spend.
+- Automate AI video creation: Batch-generate realistic candidate photos and 10-second video clips using Google Flow and reference product images driven by structured prompts.
+- Delegate with role-specific SOPs: Instead of hiring a general assistant, assign VAs to dedicated micro-roles (Account Warmup, Product Research, Content Creation, and Content Posting).
+- Hire a VA Manager to scale out of daily operations: Place a manager VA between yourself and sub-VAs so you can focus on high-level system optimization rather than task execution.
+
+## Actionable Frameworks
+### Bottom-of-the-Funnel Content Model
+A lightweight content approach using 5-15 second videos with simple product visuals, a clear hook, and a CTA designed to convert high-intent buyers who need a final push to purchase.
+
+### Tiered VA Operations Hierarchy
+An organizational structure that splits operations into four distinct VA roles (Warmup, Research, Creator, Poster) overseen by a single VA Manager, removing the founder from daily tasks.
+
+## Memorable Quotes
+> Instead of spending three hours trying to perfect one video, I'd rather have a system that is capable of continuously testing the same creative with new products.
+
+> If you're still the only person running this business every single day... you've really just built yourself a more efficient job.
+
+## Tags
+`#tiktok shop` `#ai automation` `#ecommerce` `#content creation` `#delegation`
