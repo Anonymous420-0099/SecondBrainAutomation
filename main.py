@@ -266,8 +266,15 @@ def run_full_pipeline(dry_run: bool, skip_filter: bool) -> None:
         result = process_single_video(video, gemini_client, skip_filter=skip_filter)
         results.append(result)
 
-        # Mark as processed regardless of result (don't re-process failures)
-        save_processed_id(video.video_id, utc_now_iso())
+        # Only mark as processed if successful or intentionally skipped
+        # Failed videos should be retried on the next run!
+        if result.status in ("success", "skipped"):
+            save_processed_id(video.video_id, utc_now_iso())
+        else:
+            logger.warning(
+                f"⚠️  NOT marking '{video.title}' as processed (status: {result.status}) "
+                f"— will retry next run. Error: {result.error_message}"
+            )
 
         # Rate limit delay between videos
         if i < len(new_videos):
