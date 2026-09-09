@@ -164,6 +164,9 @@ def _fetch_transcript_via_ytdlp(video_id: str) -> str | None:
             "outtmpl": os.path.join(tmpdir, "%(id)s.%(ext)s"),
             "quiet": True,
             "no_warnings": True,
+            "socket_timeout": 8,
+            "retries": 1,
+            "extractor_retries": 0,
         }
 
         cookie_path = Path(config.COOKIE_FILE_PATH)

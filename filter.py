@@ -189,11 +189,20 @@ def _gemini_classify(
                 response_mime_type="application/json",
                 response_schema=FilterDecision,
                 temperature=0.1,  # Very low temp for consistent classification
-                max_output_tokens=200,
+                max_output_tokens=500,
             ),
         )
 
-        decision: FilterDecision = response.parsed
+        if response.parsed:
+            decision: FilterDecision = response.parsed
+        else:
+            import json
+            cleaned = response.text.strip()
+            if cleaned.startswith("```"):
+                cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0].strip()
+            data = json.loads(cleaned)
+            decision = FilterDecision(**data)
+
         logger.info(
             f"[filter] Gemini classified '{video.title}' → "
             f"{'KEEP' if decision.keep else 'SKIP'} ({decision.category}: {decision.reason})"

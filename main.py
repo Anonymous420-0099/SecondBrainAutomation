@@ -131,12 +131,9 @@ def process_single_video(
     transcript_text = fetch_transcript(video.video_id)
 
     if not transcript_text:
-        logger.warning(f"⚠️  No transcript available for '{video.title}'. Skipping.")
-        return ProcessingResult(
-            video=video,
-            status="error",
-            filter_decision=decision,
-            error_message="No transcript available",
+        logger.info(
+            f"ℹ️  Transcript unavailable via API for '{video.title}'. "
+            "Falling back to direct Gemini multimodal video analysis (bypasses cloud IP bans)."
         )
 
     # --- Step 3: Structure with Gemini ---

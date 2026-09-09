@@ -76,18 +76,19 @@ def create_gemini_client() -> genai.Client:
 @retry(max_retries=3, delay=10.0, backoff=2.0)
 def structure_transcript(
     video: VideoMeta,
-    transcript_text: str,
+    transcript_text: str | None,
     client: genai.Client,
 ) -> KnowledgeCard:
     """
-    Sends a transcript to Gemini and returns a structured KnowledgeCard.
+    Sends a transcript or direct YouTube URL to Gemini and returns a structured KnowledgeCard.
 
     Uses Pydantic response_schema for guaranteed structured JSON output.
-    The Gemini SDK automatically validates the response against the schema.
+    If transcript_text is None (e.g. blocked by YouTube in cloud environments),
+    falls back to Gemini's native multimodal YouTube video analysis.
 
     Args:
         video: Video metadata.
-        transcript_text: Full transcript text.
+        transcript_text: Full transcript text, or None to use direct video understanding.
         client: Pre-initialized Gemini client.
 
     Returns:
@@ -96,27 +97,47 @@ def structure_transcript(
     Raises:
         Exception: If Gemini fails after all retries.
     """
-    # Build the user prompt with metadata + transcript
-    user_prompt = (
-        f"Video Metadata:\n"
-        f"- video_id: {video.video_id}\n"
-        f"- title: {video.title}\n"
-        f"- channel: {video.channel or 'Unknown'}\n"
-        f"- url: {video.url}\n"
-        f"- processed_at: {utc_now_iso()}\n\n"
-        f"--- TRANSCRIPT START ---\n"
-        f"{transcript_text}\n"
-        f"--- TRANSCRIPT END ---"
-    )
-
-    logger.info(
-        f"[structurer] Sending to Gemini: '{video.title}' "
-        f"({len(transcript_text.split())} words)"
-    )
+    if transcript_text:
+        user_prompt = (
+            f"Video Metadata:\n"
+            f"- video_id: {video.video_id}\n"
+            f"- title: {video.title}\n"
+            f"- channel: {video.channel or 'Unknown'}\n"
+            f"- url: {video.url}\n"
+            f"- processed_at: {utc_now_iso()}\n\n"
+            f"--- TRANSCRIPT START ---\n"
+            f"{transcript_text}\n"
+            f"--- TRANSCRIPT END ---"
+        )
+        contents = user_prompt
+        logger.info(
+            f"[structurer] Sending transcript to Gemini: '{video.title}' "
+            f"({len(transcript_text.split())} words)"
+        )
+    else:
+        user_prompt = (
+            f"Video Metadata:\n"
+            f"- video_id: {video.video_id}\n"
+            f"- title: {video.title}\n"
+            f"- channel: {video.channel or 'Unknown'}\n"
+            f"- url: {video.url}\n"
+            f"- processed_at: {utc_now_iso()}\n\n"
+            f"Please analyze the attached YouTube video and extract the structured knowledge card."
+        )
+        contents = [
+            types.Part.from_uri(
+                file_uri=video.url,
+                mime_type="video/*",
+            ),
+            user_prompt,
+        ]
+        logger.info(
+            f"[structurer] Sending direct YouTube URL to Gemini (multimodal analysis): '{video.title}'"
+        )
 
     response = client.models.generate_content(
         model=config.GEMINI_MODEL,
-        contents=user_prompt,
+        contents=contents,
         config=types.GenerateContentConfig(
             system_instruction=STRUCTURING_SYSTEM_PROMPT,
             response_mime_type="application/json",
@@ -127,7 +148,15 @@ def structure_transcript(
     )
 
     # response.parsed returns an instantiated KnowledgeCard Pydantic object
-    card: KnowledgeCard = response.parsed
+    if response.parsed:
+        card: KnowledgeCard = response.parsed
+    else:
+        import json
+        cleaned = response.text.strip()
+        if cleaned.startswith("```"):
+            cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0].strip()
+        data = json.loads(cleaned)
+        card = KnowledgeCard(**data)
 
     logger.info(
         f"[structurer] ✅ Structured '{video.title}' → "
@@ -136,3 +165,4 @@ def structure_transcript(
     )
 
     return card
+
