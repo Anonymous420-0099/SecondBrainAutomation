@@ -1,0 +1,31 @@
+# How This 17 Year Old Got 500K Views and Made $1,136 on the Most Saturated Faceless Niche | CASESTUDY
+
+- **Channel:** Saad Rashid - YouTube Automation
+- **URL:** https://www.youtube.com/watch?v=tU747bzwXQU
+- **Category:** Startups & Business
+- **Processed:** 2026-09-12
+
+## Summary
+A 17-year-old YouTube automation creator reveals how he earned over $1,136 in six days in the health niche by feeding competitor video transcripts into Claude AI to generate unique topics, hooks, and retention-optimized scripts.
+
+## Key Takeaways
+- Target high-barrier or 'hard' niches with longer video formats (18–28 minutes) to avoid crowded beginner competition and capture high CPMs ($6–$8 RPM).
+- Extract transcripts from top-performing competitor videos into a .txt file and feed them to Claude AI to reverse-engineer viral topic ideas and structured prompts without directly copying content.
+- Optimize production efficiency by thoroughly editing the first 6-7 minutes of a long video to lock in high Average View Duration (AVD), then placing voice-aligned stock footage for the remainder.
+- Mix stock footage from free repositories (Pixabay, Mixkit) with custom AI infographics/charts instead of relying purely on looping AI avatars to prevent YouTube reused content bans.
+- Monetize high-age demographic audiences (55+ years old) not just through AdSense, but also by embedding digital product links like Gumroad e-books and health templates.
+
+## Actionable Frameworks
+### Transcript-Based Topic & Script Reverse-Engineering
+A 2-step Claude AI workflow where you compile 5 top-performing competitor transcripts into a .txt file, upload it to Claude to extract high-performing topic concepts, and then prompt Claude using the same context file to generate a original, retention-optimized long-form script.
+
+### Front-Loaded Retention Editing Strategy
+An editing method for long-form videos (18-28 minutes) where precise visual matching and custom graphics are applied to the first 6-7 minutes to capture early watch time, while the rest of the video uses automated or semi-randomized stock footage aligned with voiceover key phrases.
+
+## Memorable Quotes
+> Main sabse zyada hard niches par kaam karta hun... kyunki uspe competition bhi nahi hoti.
+
+> Starting mein main 6-7 minute tak edit karta hun aur baaki main random lagaata hun... is tarah main easily bohot niches pe kaam kar sakta hun.
+
+## Tags
+`#youtube automation` `#faceless channels` `#claude ai` `#content creation` `#monetization`

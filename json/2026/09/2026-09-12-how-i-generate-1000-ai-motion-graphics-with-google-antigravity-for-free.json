@@ -1,0 +1,37 @@
+{
+  "video_id": "VvA72Kly-mU",
+  "title": "How I Generate $1000+ AI Motion Graphics With Google Antigravity (For FREE)",
+  "channel": "The Solo Entrepreneur",
+  "url": "https://www.youtube.com/watch?v=VvA72Kly-mU",
+  "processed_at": "2026-09-12T01:44:43Z",
+  "category": "AI Systems",
+  "one_sentence_summary": "Learn how to automatically generate professional, Apple-style motion graphics from video scripts using custom AI agent skills in Claude or Google Antigravity with Remotion.",
+  "key_takeaways": [
+    "Automate video graphic creation by feeding raw video scripts into AI agents with specialized skill files that break down scripts into timestamped shot lists.",
+    "Utilize Google Antigravity as a free agentic software environment alternative to Claude Code for executing render pipelines locally.",
+    "Reverse-engineer any creator's motion graphics style by sharing reference video URLs and screenshots with Claude to automatically generate reusable template components.",
+    "Export high-quality graphics using Remotion rendering pipelines, outputting ProRes 4444 MOV files with alpha channels for seamless video overlay.",
+    "Leverage pre-designed design systems (like Apple's SF Pro typography and minimalist layout rules) to prevent AI-generated motion graphics from looking generic."
+  ],
+  "actionable_frameworks": [
+    {
+      "name": "Motion Director Skill",
+      "description": "An AI agent skill framework that parses video scripts, maps narrative beats to motion graphic templates (such as FocusList, StepTracker, or BentoGrid), and outputs a batch-renderable shot list."
+    },
+    {
+      "name": "Video-to-Template Pipeline",
+      "description": "A process of feeding a reference YouTube video link and UI screenshots to an AI agent to analyze visual components, extract design languages, and program corresponding Remotion code templates."
+    }
+  ],
+  "memorable_quotes": [
+    "The best way to learn a tool is from the people who built it.",
+    "Start small, learn fast, and use AI as leverage—not as a shortcut."
+  ],
+  "related_topics": [
+    "ai",
+    "motion graphics",
+    "remotion",
+    "automation",
+    "claude"
+  ]
+}
