@@ -23,8 +23,8 @@ Powered by **Gemini 2.5 Flash** and running 100% on **GitHub Actions Cloud** for
             │ (Extracts: Core Insight, Frameworks, Quotes, Tags)
             ▼
 [ Auto-Committed to GitHub ]
-    ├── notes/YYYY/MM/YYYY-MM-DD-title.md   (Readable notes)
-    ├── json/YYYY/MM/YYYY-MM-DD-title.json    (Machine-readable cards)
+    ├── notes/YYYY/MM/YYYY-MM-DD-title.md   (Readable notes + collapsible full transcript)
+    ├── json/YYYY/MM/YYYY-MM-DD-title.json    (Machine-readable cards with complete transcript)
     └── index.json                            (Master searchable index)
 ```
 

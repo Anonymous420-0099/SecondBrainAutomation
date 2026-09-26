@@ -42,12 +42,13 @@ class ActionableFramework(BaseModel):
     description: str = Field(description="Brief description of how it works")
 
 
-class KnowledgeCard(BaseModel):
+class VideoExtractionSchema(BaseModel):
     """
     Structured knowledge card extracted from a video transcript by Gemini.
 
-    This model is ALSO passed as Gemini's response_schema to enforce
-    structured JSON output via the google-genai SDK.
+    This model is passed as Gemini's response_schema to enforce
+    structured JSON output via the google-genai SDK without forcing
+    Gemini to echo back the full transcript.
     """
 
     video_id: str = Field(description="YouTube video ID")
@@ -77,6 +78,18 @@ class KnowledgeCard(BaseModel):
     )
     related_topics: list[str] = Field(
         description="3-5 topic tags for cross-referencing, e.g. ['ai', 'agents', 'automation']"
+    )
+
+
+class KnowledgeCard(VideoExtractionSchema):
+    """
+    Complete structured knowledge card saved to disk (Markdown + JSON).
+    Inherits all extracted fields and adds the full transcript.
+    """
+
+    transcript: str | None = Field(
+        default=None,
+        description="Full text transcript of the video",
     )
 
 

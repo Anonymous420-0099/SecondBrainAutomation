@@ -79,6 +79,19 @@ def generate_markdown(card: KnowledgeCard) -> str:
     lines.append(tags)
     lines.append("")
 
+    # Full Transcript (Collapsible)
+    if card.transcript:
+        lines.append("## Full Transcript")
+        lines.append("")
+        word_count = len(card.transcript.split())
+        lines.append("<details>")
+        lines.append(f"<summary>Click to expand full transcript ({word_count:,} words)</summary>")
+        lines.append("")
+        lines.append(card.transcript.strip())
+        lines.append("")
+        lines.append("</details>")
+        lines.append("")
+
     return "\n".join(lines)
 
 

@@ -209,6 +209,9 @@ def run_test_mode(test_url: str, dry_run: bool, skip_filter: bool) -> None:
         logger.info(f"Summary: {result.knowledge_card.one_sentence_summary}")
         logger.info(f"Category: {result.knowledge_card.category}")
         logger.info(f"Takeaways: {len(result.knowledge_card.key_takeaways)}")
+        if result.knowledge_card.transcript:
+            words = len(result.knowledge_card.transcript.split())
+            logger.info(f"Transcript: {words:,} words saved in note & JSON")
     elif result.error_message:
         logger.info(f"Error: {result.error_message}")
     logger.info(f"{'='*60}")

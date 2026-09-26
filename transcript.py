@@ -48,9 +48,33 @@ def _get_transcript_api() -> YouTubeTranscriptApi:
     return YouTubeTranscriptApi()
 
 
+def format_transcript_paragraphs(text: str, words_per_paragraph: int = 90) -> str:
+    """
+    Groups raw transcript text into clean, readable paragraphs.
+    Ensures natural paragraph breaks at sentence endings where possible.
+    """
+    if not text:
+        return ""
+    words = text.split()
+    paragraphs: list[str] = []
+    current_para: list[str] = []
+
+    for word in words:
+        current_para.append(word)
+        if len(current_para) >= words_per_paragraph:
+            if word.endswith((".", "?", "!")) or len(current_para) >= words_per_paragraph + 35:
+                paragraphs.append(" ".join(current_para))
+                current_para = []
+
+    if current_para:
+        paragraphs.append(" ".join(current_para))
+
+    return "\n\n".join(paragraphs)
+
+
 def fetch_transcript(video_id: str) -> str | None:
     """
-    Fetches the text transcript for a YouTube video.
+    Fetches the full text transcript for a YouTube video.
 
     Tries languages in priority order (EN → HI → UR), with fallback
     to any available track and translation if needed.
@@ -59,7 +83,7 @@ def fetch_transcript(video_id: str) -> str | None:
         video_id: The YouTube video ID (e.g., 'LqY6hFLMEJw').
 
     Returns:
-        Full transcript as a single string, or None if unavailable.
+        Full transcript formatted into clean paragraphs, or None if unavailable.
     """
     ytt_api = _get_transcript_api()
 
@@ -70,11 +94,12 @@ def fetch_transcript(video_id: str) -> str | None:
             languages=config.TRANSCRIPT_LANGUAGES,
         )
         full_text = " ".join([snippet.text for snippet in fetched])
+        formatted = format_transcript_paragraphs(full_text)
         logger.info(
-            f"[transcript] Fetched transcript for {video_id} "
-            f"({len(full_text.split())} words)"
+            f"[transcript] Fetched full transcript for {video_id} "
+            f"({len(formatted.split())} words)"
         )
-        return _truncate_if_needed(full_text)
+        return formatted
 
     except TranscriptsDisabled:
         logger.warning(
@@ -115,7 +140,8 @@ def fetch_transcript(video_id: str) -> str | None:
                 translated = track.translate(target_lang)
                 fetched = translated.fetch()
                 full_text = " ".join([snippet.text for snippet in fetched])
-                return _truncate_if_needed(full_text)
+                formatted = format_transcript_paragraphs(full_text)
+                return formatted
 
         # No translatable tracks found — try fetching whatever is available
         for track in transcript_list:
@@ -125,7 +151,8 @@ def fetch_transcript(video_id: str) -> str | None:
             )
             fetched = track.fetch()
             full_text = " ".join([snippet.text for snippet in fetched])
-            return _truncate_if_needed(full_text)
+            formatted = format_transcript_paragraphs(full_text)
+            return formatted
 
         logger.warning(f"[transcript] No transcript tracks available via API for {video_id}")
 
@@ -211,11 +238,12 @@ def _fetch_transcript_via_ytdlp(video_id: str) -> str | None:
 
             full_text = " ".join(clean_lines)
             if full_text:
+                formatted = format_transcript_paragraphs(full_text)
                 logger.info(
                     f"[transcript] Successfully extracted via yt-dlp for {video_id} "
-                    f"({len(full_text.split())} words)"
+                    f"({len(formatted.split())} words)"
                 )
-                return _truncate_if_needed(full_text)
+                return formatted
 
         except Exception as e:
             logger.warning(f"[transcript] yt-dlp subtitle extraction failed for {video_id}: {e}")
@@ -223,18 +251,19 @@ def _fetch_transcript_via_ytdlp(video_id: str) -> str | None:
     return None
 
 
-def _truncate_if_needed(text: str) -> str:
+def truncate_transcript(text: str, max_words: int | None = None) -> str:
     """
-    Truncates transcript to MAX_TRANSCRIPT_WORDS if it exceeds the limit.
-    This prevents sending extremely long transcripts to Gemini for 3h+ videos.
+    Truncates transcript to max_words (defaults to config.MAX_TRANSCRIPT_WORDS)
+    if it exceeds the limit. Used when preparing prompt content for LLM calls.
     """
+    limit = max_words or config.MAX_TRANSCRIPT_WORDS
     words = text.split()
-    if len(words) > config.MAX_TRANSCRIPT_WORDS:
+    if len(words) > limit:
         logger.info(
             f"[transcript] Truncating from {len(words)} to "
-            f"{config.MAX_TRANSCRIPT_WORDS} words"
+            f"{limit} words for LLM context"
         )
-        return " ".join(words[: config.MAX_TRANSCRIPT_WORDS])
+        return " ".join(words[:limit])
     return text
 
 

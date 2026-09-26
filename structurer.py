@@ -14,7 +14,8 @@ from google import genai
 from google.genai import types
 
 import config
-from models import KnowledgeCard, VideoMeta
+from models import KnowledgeCard, VideoExtractionSchema, VideoMeta
+from transcript import truncate_transcript
 from utils import retry, utc_now_iso
 
 logger = logging.getLogger("youtube_second_brain")
@@ -98,6 +99,7 @@ def structure_transcript(
         Exception: If Gemini fails after all retries.
     """
     if transcript_text:
+        prompt_transcript = truncate_transcript(transcript_text, config.MAX_TRANSCRIPT_WORDS)
         user_prompt = (
             f"Video Metadata:\n"
             f"- video_id: {video.video_id}\n"
@@ -106,13 +108,14 @@ def structure_transcript(
             f"- url: {video.url}\n"
             f"- processed_at: {utc_now_iso()}\n\n"
             f"--- TRANSCRIPT START ---\n"
-            f"{transcript_text}\n"
+            f"{prompt_transcript}\n"
             f"--- TRANSCRIPT END ---"
         )
         contents = user_prompt
         logger.info(
             f"[structurer] Sending transcript to Gemini: '{video.title}' "
-            f"({len(transcript_text.split())} words)"
+            f"({len(prompt_transcript.split())} words in prompt, "
+            f"{len(transcript_text.split())} words total)"
         )
     else:
         user_prompt = (
@@ -141,22 +144,26 @@ def structure_transcript(
         config=types.GenerateContentConfig(
             system_instruction=STRUCTURING_SYSTEM_PROMPT,
             response_mime_type="application/json",
-            response_schema=KnowledgeCard,
+            response_schema=VideoExtractionSchema,
             temperature=config.GEMINI_TEMPERATURE,
             max_output_tokens=config.GEMINI_MAX_OUTPUT_TOKENS,
         ),
     )
 
-    # response.parsed returns an instantiated KnowledgeCard Pydantic object
+    # Parse response into dictionary
     if response.parsed:
-        card: KnowledgeCard = response.parsed
+        raw_card = response.parsed
+        card_data = raw_card.model_dump()
     else:
         import json
         cleaned = response.text.strip()
         if cleaned.startswith("```"):
             cleaned = cleaned.split("\n", 1)[1].rsplit("```", 1)[0].strip()
-        data = json.loads(cleaned)
-        card = KnowledgeCard(**data)
+        card_data = json.loads(cleaned)
+
+    # Attach full transcript to KnowledgeCard
+    card_data["transcript"] = transcript_text
+    card = KnowledgeCard(**card_data)
 
     logger.info(
         f"[structurer] ✅ Structured '{video.title}' → "
