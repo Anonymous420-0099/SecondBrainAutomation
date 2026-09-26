@@ -1,0 +1,36 @@
+# How to Start & Grow a YouTube Channel in 2026 (FULL COURSE)
+
+- **Channel:** DecodingYT
+- **URL:** https://www.youtube.com/watch?v=kaAdmiUEmBE
+- **Category:** Startups & Business
+- **Processed:** 2026-09-26
+
+## Summary
+A comprehensive roadmap for beginners to start, grow, and monetize a YouTube channel by mastering algorithm metrics, strategic niche selection, content packaging, and data-driven video strategy.
+
+## Key Takeaways
+- Understand YouTube Algorithm Signals: YouTube uses Viewer Signals (watch history, searches) to profile audiences and Video Signals (CTR, watch time, retention) to evaluate video reach.
+- Select a Niche with the 3P Rule: Pick a topic at the intersection of Passion (interest), Proficiency (skills/knowledge), and Profit (market demand and monetization potential).
+- Find Viral Topics via the Outlier Method: Identify videos from smaller channels that significantly outperform their channel's average view count and adapt their formats with your unique spin.
+- Create a Practice Channel First: Build a pressure-free secondary channel to upload 1-2 videos per week for a month to build technical skills in scripting, recording, and editing before launching your main channel.
+- Master Curiosity-Driven Packaging: High Click-Through Rate (CTR) relies on complementary titles and thumbnails that spark immediate curiosity or challenge viewer assumptions.
+- Hook Viewers with a 3-Step Intro Framework: Structure the first 30 seconds around the Goal (the topic promise), the Problem (fear/frustration), and the Solution (curiosity spark).
+- Incentivize Watch Time with an End Reward: Tease and deliver the most impactful or exciting element of your video at the end to keep viewers watching longer.
+
+## Actionable Frameworks
+### The 3P Rule
+A niche selection framework that locates your ideal channel topic at the overlap of Passion, Proficiency, and Profit.
+
+### The Outlier Method
+A research methodology for identifying proven viral topics by isolating videos on smaller channels that exceed their channel's average view count.
+
+### 3-Step Intro Framework
+A scripting model for video hooks that presents The Goal, introduces The Problem to induce fear/frustration, and hints at The Solution to build curiosity.
+
+## Memorable Quotes
+> Winners don't do different things, they do things differently.
+
+> The more videos you make, the more you will learn.
+
+## Tags
+`#youtube` `#content creation` `#marketing` `#growth strategy` `#video editing`

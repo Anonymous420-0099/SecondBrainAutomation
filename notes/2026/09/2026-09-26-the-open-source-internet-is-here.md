@@ -1,0 +1,32 @@
+# The Open Source Internet Is Here
+
+- **Channel:** Data Slayer
+- **URL:** https://www.youtube.com/watch?v=5vbl5FL-nsI
+- **Category:** Electronics
+- **Processed:** 2026-09-26
+
+## Summary
+This video demonstrates how to bridge decentralized Reticulum mesh networks across global distances using Software Defined Radios and HF Skywave propagation while maintaining legal compliance with amateur radio regulations.
+
+## Key Takeaways
+- Reticulum (RNS) is a cryptographic, transport-agnostic networking stack that enables off-grid, peer-to-peer data transmission across LoRa, Wi-Fi, Ethernet, and HF radio.
+- High Frequency (HF) radio signals in the 28 MHz (10-meter) band utilize Skywave propagation—bouncing off the ionosphere—to achieve global communication without cell towers or satellite subscriptions.
+- Amateur radio rules strictly prohibit encrypted transmissions; to stay legal, encrypted Reticulum packets are decrypted at a gateway node, sent over HF as a public, open codec frame, and re-encrypted at the receiving gateway.
+- Affordable Software Defined Radios (SDR) like the Hermes-Lite 2 (HF transceiver) and RTL-SDR ($37 receiver dongle) allow software to generate and decode custom digital radio frames directly on standard PC hardware.
+- A NanoVNA (Vector Network Analyzer) is a critical diagnostic tool used to measure Standing Wave Ratio (SWR) and tune antenna resonance (e.g., trimming dipole wire lengths to match 28 MHz).
+- Porting computationally intensive digital signal processing and decoding algorithms (such as LDPC decoders) from Python to Rust substantially reduces latency on low-power devices like Raspberry Pi 5.
+
+## Actionable Frameworks
+### Reticulum Network Stack (RNS)
+A cryptography-based, transport-agnostic mesh networking protocol that routes data securely across arbitrary physical media (Wi-Fi, LoRa, HF Radio) without relying on central authorities or IP networks.
+
+### HF Public Codec Bridge Strategy
+A compliance architecture for transmitting mesh packets over amateur radio bands by terminating end-to-end encryption at a licensed gateway, sending data via an unencrypted public codec frame, and re-encrypting at the destination gateway.
+
+## Memorable Quotes
+> In Reticulum, encryption is gravity.
+
+> Greater still is 'can't be evil'—and that's the ambition behind decentralized blockchains and permissionless networks like Reticulum: use math to reduce the amount of trust we have to place in anyone standing in the middle.
+
+## Tags
+`#mesh networking` `#reticulum` `#sdr` `#ham radio` `#off-grid`
