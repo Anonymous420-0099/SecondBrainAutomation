@@ -138,17 +138,36 @@ def structure_transcript(
             f"[structurer] Sending direct YouTube URL to Gemini (multimodal analysis): '{video.title}'"
         )
 
-    response = client.models.generate_content(
-        model=config.GEMINI_MODEL,
-        contents=contents,
-        config=types.GenerateContentConfig(
-            system_instruction=STRUCTURING_SYSTEM_PROMPT,
-            response_mime_type="application/json",
-            response_schema=VideoExtractionSchema,
-            temperature=config.GEMINI_TEMPERATURE,
-            max_output_tokens=config.GEMINI_MAX_OUTPUT_TOKENS,
-        ),
-    )
+    models_to_try = [config.GEMINI_MODEL]
+    for fallback in ["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.8-flash", "gemini-3.7-flash"]:
+        if fallback not in models_to_try:
+            models_to_try.append(fallback)
+
+    response = None
+    last_err = None
+    for model_name in models_to_try:
+        try:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=contents,
+                config=types.GenerateContentConfig(
+                    system_instruction=STRUCTURING_SYSTEM_PROMPT,
+                    response_mime_type="application/json",
+                    response_schema=VideoExtractionSchema,
+                    temperature=config.GEMINI_TEMPERATURE,
+                    max_output_tokens=config.GEMINI_MAX_OUTPUT_TOKENS,
+                ),
+            )
+            break
+        except Exception as e:
+            last_err = e
+            logger.warning(
+                f"[structurer] Model '{model_name}' failed for '{video.title}': {e}. "
+                "Trying next model candidate..."
+            )
+
+    if response is None:
+        raise last_err
 
     # Parse response into dictionary
     if response.parsed:

@@ -72,12 +72,44 @@ def format_transcript_paragraphs(text: str, words_per_paragraph: int = 90) -> st
     return "\n\n".join(paragraphs)
 
 
+def _parse_vtt_text(raw_text: str) -> str:
+    """Parses WEBVTT subtitle text into a single clean string."""
+    import re
+    clean_lines: list[str] = []
+    for line in raw_text.splitlines():
+        line = line.strip()
+        if (
+            not line
+            or "-->" in line
+            or line.startswith("WEBVTT")
+            or line.startswith("Kind:")
+            or line.startswith("Language:")
+            or line.startswith("NOTE")
+        ):
+            continue
+        line = re.sub(r"<[^>]+>", "", line).strip()
+        if line and (not clean_lines or clean_lines[-1] != line):
+            clean_lines.append(line)
+    return " ".join(clean_lines)
+
+
+def _parse_json3_text(json_data: dict) -> str:
+    """Parses YouTube json3 format captions into a single clean string."""
+    words: list[str] = []
+    for ev in json_data.get("events", []):
+        for seg in ev.get("segs", []):
+            txt = seg.get("utf8", "").strip()
+            if txt and txt != "\n":
+                words.append(txt)
+    return " ".join(words)
+
+
 def fetch_transcript(video_id: str) -> str | None:
     """
     Fetches the full text transcript for a YouTube video.
 
-    Tries languages in priority order (EN → HI → UR), with fallback
-    to any available track and translation if needed.
+    Tries languages in priority order (EN regional variants → HI → UR),
+    with fallback to native tracks, translation, and yt-dlp extraction.
 
     Args:
         video_id: The YouTube video ID (e.g., 'LqY6hFLMEJw').
@@ -96,16 +128,15 @@ def fetch_transcript(video_id: str) -> str | None:
         full_text = " ".join([snippet.text for snippet in fetched])
         formatted = format_transcript_paragraphs(full_text)
         logger.info(
-            f"[transcript] Fetched full transcript for {video_id} "
+            f"[transcript] Fetched full transcript for {video_id} via API "
             f"({len(formatted.split())} words)"
         )
         return formatted
 
     except TranscriptsDisabled:
         logger.warning(
-            f"[transcript] Captions disabled by creator for {video_id}. Skipping."
+            f"[transcript] Captions disabled by creator for {video_id}. Trying yt-dlp..."
         )
-        return None
 
     except VideoUnavailable:
         logger.warning(
@@ -115,38 +146,55 @@ def fetch_transcript(video_id: str) -> str | None:
 
     except NoTranscriptFound:
         logger.info(
-            f"[transcript] No transcript in {config.TRANSCRIPT_LANGUAGES} "
-            f"for {video_id}. Trying translation fallback..."
+            f"[transcript] No exact match in {config.TRANSCRIPT_LANGUAGES} "
+            f"for {video_id}. Checking available tracks..."
         )
 
     except Exception as e:
         logger.warning(
-            f"[transcript] Unexpected error fetching {video_id}: {e}. "
-            "Trying fallback..."
+            f"[transcript] Direct fetch error for {video_id}: {e}. "
+            "Checking track list and yt-dlp fallback..."
         )
 
-    # --- Attempt 2: Find any available track and translate ---
+    # --- Attempt 2: Find any available track in list ---
     try:
         transcript_list = ytt_api.list(video_id)
 
+        # 2a. Check if any track is already an English or preferred variant (fetch directly, DO NOT translate!)
         for track in transcript_list:
-            if track.is_translatable:
-                # Translate to English (first preferred language)
-                target_lang = config.TRANSCRIPT_LANGUAGES[0]  # "en"
+            code = track.language_code.lower()
+            if any(code == lang.lower() or code.startswith(f"{lang.lower()}-") for lang in ["en", "hi", "ur"]):
                 logger.info(
-                    f"[transcript] Translating {track.language_code} → "
-                    f"{target_lang} for {video_id}"
+                    f"[transcript] Fetching native preferred track '{track.language_code}' for {video_id}"
                 )
-                translated = track.translate(target_lang)
-                fetched = translated.fetch()
+                fetched = track.fetch()
                 full_text = " ".join([snippet.text for snippet in fetched])
                 formatted = format_transcript_paragraphs(full_text)
                 return formatted
 
-        # No translatable tracks found — try fetching whatever is available
+        # 2b. If only foreign tracks exist, translate to English
+        for track in transcript_list:
+            if track.is_translatable:
+                target_lang = "en"
+                logger.info(
+                    f"[transcript] Translating foreign track {track.language_code} → "
+                    f"{target_lang} for {video_id}"
+                )
+                try:
+                    translated = track.translate(target_lang)
+                    fetched = translated.fetch()
+                    full_text = " ".join([snippet.text for snippet in fetched])
+                    formatted = format_transcript_paragraphs(full_text)
+                    return formatted
+                except Exception as te:
+                    logger.warning(
+                        f"[transcript] Translation failed for {track.language_code}: {te}"
+                    )
+
+        # 2c. Fallback: fetch whatever first track is available
         for track in transcript_list:
             logger.info(
-                f"[transcript] Using non-preferred language "
+                f"[transcript] Using fallback language track "
                 f"'{track.language_code}' for {video_id}"
             )
             fetched = track.fetch()
@@ -154,13 +202,11 @@ def fetch_transcript(video_id: str) -> str | None:
             formatted = format_transcript_paragraphs(full_text)
             return formatted
 
-        logger.warning(f"[transcript] No transcript tracks available via API for {video_id}")
-
     except Exception as e:
-        logger.warning(f"[transcript] youtube-transcript-api failed for {video_id}: {e}")
+        logger.warning(f"[transcript] youtube-transcript-api track listing failed for {video_id}: {e}")
 
-    # --- Attempt 3: yt-dlp subtitle extraction fallback (bypasses datacenter IP bans) ---
-    logger.info(f"[transcript] Trying yt-dlp subtitle extraction fallback for {video_id}...")
+    # --- Attempt 3: yt-dlp subtitle extraction (handles cloud IP blocks and regional tracks) ---
+    logger.info(f"[transcript] Trying yt-dlp subtitle extraction for {video_id}...")
     ytdlp_text = _fetch_transcript_via_ytdlp(video_id)
     if ytdlp_text:
         return ytdlp_text
@@ -170,36 +216,108 @@ def fetch_transcript(video_id: str) -> str | None:
 
 def _fetch_transcript_via_ytdlp(video_id: str) -> str | None:
     """
-    Fallback subtitle extraction using yt-dlp.
-    Downloads auto-generated or manual VTT subtitles to a temporary directory
-    and parses the plain text. Works reliably in cloud environments where
-    direct youtube-transcript-api requests are throttled or IP-blocked.
+    Robust subtitle extraction using yt-dlp.
+    1. First tries direct timedtext URL retrieval (vtt / json3), which bypasses
+       most downloader-level HTTP 429 blocks.
+    2. Falls back to downloading VTT subtitles to a temporary directory.
     """
     import glob
+    import json
     import os
-    import re
     import tempfile
+    import requests
     import yt_dlp
 
+    cookie_path = Path(config.COOKIE_FILE_PATH)
+    ydl_opts: dict = {
+        "skip_download": True,
+        "writesubtitles": True,
+        "writeautomaticsub": True,
+        "subtitleslangs": ["en.*", "hi.*", "ur.*", "en", "en-US", "en-GB", "en-CA", "en-orig", "hi", "ur", "all"],
+        "subtitlesformat": "vtt",
+        "quiet": True,
+        "no_warnings": True,
+        "socket_timeout": 20,
+        "retries": 2,
+    }
+    if cookie_path.is_file():
+        ydl_opts["cookiefile"] = str(cookie_path)
+
+    # Strategy A: Direct timedtext URL fetch via extract_info (avoids downloader 429)
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(f"https://www.youtube.com/watch?v={video_id}", download=False)
+        subs = info.get("subtitles") or {}
+        auto = info.get("automatic_captions") or {}
+
+        # Collect candidate tracks in priority order: manual subtitles first, then auto captions
+        candidates: list[tuple[str, list[dict]]] = []
+        for source in (subs, auto):
+            for lang in ["en", "hi", "ur"]:
+                for k, track in source.items():
+                    k_lower = k.lower()
+                    if k_lower == lang or k_lower.startswith(f"{lang}-") or k_lower.startswith(f"{lang}_"):
+                        if (k, track) not in candidates:
+                            candidates.append((k, track))
+
+        if candidates:
+            session = requests.Session()
+            session.headers.update({
+                "User-Agent": (
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/124.0.0.0 Safari/537.36"
+                )
+            })
+            if cookie_path.is_file():
+                try:
+                    import http.cookiejar
+                    cj = http.cookiejar.MozillaCookieJar(str(cookie_path))
+                    cj.load(ignore_discard=True, ignore_expires=True)
+                    session.cookies = cj
+                except Exception:
+                    pass
+
+            for k, track in candidates:
+                # 1. Try VTT format
+                vtt_entry = next((e for e in track if e.get("ext") == "vtt"), None)
+                if vtt_entry and vtt_entry.get("url"):
+                    try:
+                        r = session.get(vtt_entry["url"], timeout=20)
+                        if r.status_code == 200 and r.text:
+                            parsed = _parse_vtt_text(r.text)
+                            if len(parsed.split()) >= 30:
+                                formatted = format_transcript_paragraphs(parsed)
+                                logger.info(
+                                    f"[transcript] Successfully extracted via yt-dlp timedtext VTT ({k}) for {video_id} "
+                                    f"({len(formatted.split())} words)"
+                                )
+                                return formatted
+                    except Exception:
+                        pass
+
+                # 2. Try JSON3 format
+                json3_entry = next((e for e in track if e.get("ext") == "json3"), None)
+                if json3_entry and json3_entry.get("url"):
+                    try:
+                        r = session.get(json3_entry["url"], timeout=20)
+                        if r.status_code == 200:
+                            parsed = _parse_json3_text(r.json())
+                            if len(parsed.split()) >= 30:
+                                formatted = format_transcript_paragraphs(parsed)
+                                logger.info(
+                                    f"[transcript] Successfully extracted via yt-dlp timedtext JSON3 ({k}) for {video_id} "
+                                    f"({len(formatted.split())} words)"
+                                )
+                                return formatted
+                    except Exception:
+                        pass
+    except Exception as e:
+        logger.debug(f"[transcript] Direct timedtext extraction attempt failed for {video_id}: {e}")
+
+    # Strategy B: Download to temporary directory
     with tempfile.TemporaryDirectory() as tmpdir:
-        ydl_opts: dict = {
-            "skip_download": True,
-            "writesubtitles": True,
-            "writeautomaticsub": True,
-            "subtitleslangs": list(config.TRANSCRIPT_LANGUAGES) + ["en", "hi", "ur"],
-            "subtitlesformat": "vtt",
-            "outtmpl": os.path.join(tmpdir, "%(id)s.%(ext)s"),
-            "quiet": True,
-            "no_warnings": True,
-            "socket_timeout": 8,
-            "retries": 1,
-            "extractor_retries": 0,
-        }
-
-        cookie_path = Path(config.COOKIE_FILE_PATH)
-        if cookie_path.is_file():
-            ydl_opts["cookiefile"] = str(cookie_path)
-
+        ydl_opts["outtmpl"] = os.path.join(tmpdir, "%(id)s.%(ext)s")
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([f"https://www.youtube.com/watch?v={video_id}"])
@@ -209,44 +327,33 @@ def _fetch_transcript_via_ytdlp(video_id: str) -> str | None:
                 logger.warning(f"[transcript] yt-dlp found no subtitles for {video_id}")
                 return None
 
-            # Prefer preferred languages
+            # Prefer English, Hindi, Urdu in order
             target_file = vtt_files[0]
-            for lang in config.TRANSCRIPT_LANGUAGES:
-                matched = [f for f in vtt_files if f".{lang}." in f]
+            for lang in ["en", "hi", "ur"]:
+                matched = [
+                    f for f in vtt_files
+                    if f".{lang}." in os.path.basename(f).lower()
+                    or f".{lang}-" in os.path.basename(f).lower()
+                    or f".{lang}_" in os.path.basename(f).lower()
+                ]
                 if matched:
                     target_file = matched[0]
                     break
 
             with open(target_file, "r", encoding="utf-8", errors="replace") as f:
-                lines = f.readlines()
+                content = f.read()
 
-            clean_lines: list[str] = []
-            for line in lines:
-                line = line.strip()
-                if (
-                    not line
-                    or "-->" in line
-                    or line.startswith("WEBVTT")
-                    or line.startswith("Kind:")
-                    or line.startswith("Language:")
-                ):
-                    continue
-                # Strip inline HTML-like timestamps/tags
-                line = re.sub(r"<[^>]+>", "", line).strip()
-                if line and (not clean_lines or clean_lines[-1] != line):
-                    clean_lines.append(line)
-
-            full_text = " ".join(clean_lines)
-            if full_text:
-                formatted = format_transcript_paragraphs(full_text)
+            parsed = _parse_vtt_text(content)
+            if parsed and len(parsed.split()) >= 30:
+                formatted = format_transcript_paragraphs(parsed)
                 logger.info(
-                    f"[transcript] Successfully extracted via yt-dlp for {video_id} "
+                    f"[transcript] Successfully extracted via yt-dlp VTT file for {video_id} "
                     f"({len(formatted.split())} words)"
                 )
                 return formatted
 
         except Exception as e:
-            logger.warning(f"[transcript] yt-dlp subtitle extraction failed for {video_id}: {e}")
+            logger.warning(f"[transcript] yt-dlp subtitle download failed for {video_id}: {e}")
 
     return None
 

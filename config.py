@@ -40,7 +40,7 @@ COOKIE_FILE_PATH: str = os.getenv("COOKIE_FILE_PATH", str(_project_dir / "cookie
 # ---------------------------------------------------------------------------
 # Gemini API Settings
 # ---------------------------------------------------------------------------
-GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
+GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
 GEMINI_TEMPERATURE: float = 0.3  # Low temp for factual extraction
 GEMINI_MAX_OUTPUT_TOKENS: int = 2000
 API_DELAY_SECONDS: float = 4.0  # Delay between Gemini calls (free tier: 10-15 RPM)
@@ -64,9 +64,18 @@ MIN_DURATION_SECONDS: int = 60
 # ---------------------------------------------------------------------------
 # Transcript Settings
 # ---------------------------------------------------------------------------
-# Language priority for transcript fetching
+# Language priority for transcript fetching (includes standard regional variants)
 # Manual captions are tried first for each language, then auto-generated
-TRANSCRIPT_LANGUAGES: list[str] = ["en", "hi", "ur"]
+TRANSCRIPT_LANGUAGES: list[str] = [
+    "en",
+    "en-US",
+    "en-GB",
+    "en-CA",
+    "en-orig",
+    "hi",
+    "hi-Latn",
+    "ur",
+]
 
 # Maximum transcript length in words (keeps prompts fast and within free tier limits)
 MAX_TRANSCRIPT_WORDS: int = 5_000
