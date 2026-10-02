@@ -1,0 +1,31 @@
+# Google Flow Free Tutorial: How To Make Cinematic AI Videos With No Editing Skills
+
+- **Channel:** Vaibhav Sisinty
+- **URL:** https://www.youtube.com/watch?v=wj8sGbKhNtU
+- **Category:** AI Systems
+- **Processed:** 2026-10-02
+
+## Summary
+A comprehensive tutorial on Google Flow powered by Gemini Omni, teaching creators how to build professional cinematic videos and custom AI tools without prior editing experience.
+
+## Key Takeaways
+- Google Flow operates on Gemini Omni, a multimodal AI model that accepts text, images, audio, and video inputs to generate cohesive content.
+- To maintain character and location consistency across video frames, lock the character first, then the location, before generating specific action shots.
+- Use the Agent setting with 'Confirm before generating' set to 'Always' to prevent wasting your video and image generation credits on unwanted outputs.
+- Google Flow's Tools section allows you to build custom reusable workflows (like Style Switchers or Scene Explorers) that can be saved and applied to future projects instantly.
+- When writing prompts for Gemini Omni, leverage the 5 core building blocks: Shot framing/motion, Style, Lighting, Location, and Action without over-engineering every micro-detail.
+
+## Actionable Frameworks
+### Gemini Omni 5-Block Prompting Pyramid
+A methodology for structuring AI video generation prompts using five core blocks: Shot framing & motion, Style, Lighting, Location, and Action, allowing the model's training to handle fine details.
+
+### Consistency Lock Workflow
+A sequential creation order for multi-shot videos where you lock the character first, lock the location second, and only then generate reference shots to avoid visual discrepancies.
+
+## Memorable Quotes
+> The gap between the people who started using these tools in week one versus the people who waited six months is going to be the most expensive gap in the AI industry this year.
+
+> You do not have to describe every single leaf, every brick, and every detail of the setting.
+
+## Tags
+`#ai video generation` `#gemini omni` `#google flow` `#prompt engineering` `#automation`
