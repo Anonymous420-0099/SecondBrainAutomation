@@ -608,5 +608,25 @@
     "processed_at": "2026-10-08T03:18:10Z",
     "url": "https://www.youtube.com/watch?v=UVsIqkkPLYU",
     "note_path": "notes/2026/10/2026-10-08-the-most-valuable-youtube-advice-youll-ever-hear.md"
+  },
+  {
+    "video_id": "zke3bTtvmLo",
+    "title": "How to Make Viral Motion Graphics With AI With 0$ (Turned it into a Skill)",
+    "channel": "Jad M.H  | AI Automation",
+    "category": "AI Systems",
+    "summary": "By combining LLM text generation with local code execution, browser screenshot automation, and FFmpeg, you can generate complete, zero-cost motion graphics and lyric videos from a single prompt.",
+    "processed_at": "2026-10-09T03:17:00Z",
+    "url": "https://www.youtube.com/watch?v=zke3bTtvmLo",
+    "note_path": "notes/2026/10/2026-10-09-how-to-make-viral-motion-graphics-with-ai-with-0-turned-it-into-a-skill.md"
+  },
+  {
+    "video_id": "7vkhoCM67PU",
+    "title": "YouTube Literally Just Changed the Algorithm",
+    "channel": "vidIQ",
+    "category": "Startups & Business",
+    "summary": "YouTube updated its recommendation algorithm to heavily prioritize original content and reduce the reach of aggregated or re-uploaded Shorts that lack transformative commentary or unique perspectives.",
+    "processed_at": "2026-10-09T03:17:23Z",
+    "url": "https://www.youtube.com/watch?v=7vkhoCM67PU",
+    "note_path": "notes/2026/10/2026-10-09-youtube-literally-just-changed-the-algorithm.md"
   }
 ]

@@ -1,0 +1,30 @@
+# YouTube Literally Just Changed the Algorithm
+
+- **Channel:** vidIQ
+- **URL:** https://www.youtube.com/watch?v=7vkhoCM67PU
+- **Category:** Startups & Business
+- **Processed:** 2026-10-09
+
+## Summary
+YouTube updated its recommendation algorithm to heavily prioritize original content and reduce the reach of aggregated or re-uploaded Shorts that lack transformative commentary or unique perspectives.
+
+## Key Takeaways
+- YouTube has officially updated its recommendation and spam policies to target re-uploaded, scraped, or unoriginal content on Shorts.
+- Channels primarily aggregating or reposting clips from other creators without significant commentary, editing, or educational value will see a drop in distribution.
+- If using clips from other creators as a launching point, you must add substantive new meaning, voice, storytelling, or your own unique point of view.
+- Simple template-based edits, bulk changes, or minor technical filters (like changing speed or pitch) are no longer sufficient to bypass reuse detection.
+- Monetization policies also strictly penalize compilation channels and re-uploaded content that lacks original creative value.
+
+## Actionable Frameworks
+### Transformative Content Framework
+The principle that taking existing material requires adding enough new meaning, commentary, context, and creativity to be meaningfully different from the original.
+
+## Memorable Quotes
+> If you do take existing material, then you need to add new meaning, commentary, context, creativity, enough that it becomes something meaningfully different from the original content.
+
+> Nothing on this platform can ever be simply seen as positive or negatives. There's always going to be a grey area in between.
+
+> The algorithm doesn't want you to copy and paste, add captions, or insert filter. Simply, it wants you to do this: to create something new that's never been seen before on YouTube.
+
+## Tags
+`#algorithm` `#content creation` `#youtube shorts` `#monetization` `#startups`
