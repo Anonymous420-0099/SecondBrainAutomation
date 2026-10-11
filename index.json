@@ -638,5 +638,15 @@
     "processed_at": "2026-10-10T03:04:17Z",
     "url": "https://www.youtube.com/watch?v=NV-Omr8jnGQ",
     "note_path": "notes/2026/10/2026-10-10-just-another-small-channel-stuck-in-view-jail-and-then.md"
+  },
+  {
+    "video_id": "HIRDzMtuWFk",
+    "title": "Anthropic Engineer Explains: What to Build Instead of AI Agents",
+    "channel": "Nate Herk | AI Automation",
+    "category": "AI Systems",
+    "summary": "Instead of building custom single-purpose agents from scratch, developers should use general-purpose agents equipped with reusable, modular skill directories and progressive disclosure to prevent token waste and context rot.",
+    "processed_at": "2026-10-11T02:30:05Z",
+    "url": "https://www.youtube.com/watch?v=HIRDzMtuWFk",
+    "note_path": "notes/2026/10/2026-10-11-anthropic-engineer-explains-what-to-build-instead-of-ai-agents.md"
   }
 ]
