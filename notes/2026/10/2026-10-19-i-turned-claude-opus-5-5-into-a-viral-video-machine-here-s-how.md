@@ -1,0 +1,28 @@
+# I Turned Claude Opus 5.5 Into a Viral Video Machine (Here's How)
+
+- **Channel:** The Zinny Studio
+- **URL:** https://www.youtube.com/watch?v=Aj5v78U3vm0
+- **Category:** AI Systems
+- **Processed:** 2026-10-19
+
+## Summary
+How to configure Claude Opus 5.5 with ElevenLabs and HyperFrames to automate the complete production of motion graphics videos from scratch.
+
+## Key Takeaways
+- Connect Claude to a dedicated workspace folder containing your project files so it can read and write directly to your workspace.
+- Install the HyperFrames skill via the npm command to give Claude the capability to render complex motion graphics videos directly.
+- Extract downloaded skill zip folders before pointing Claude to them; otherwise, Claude will be unable to read the files.
+- Provide reference videos to Claude so it can mirror pacing, camera movements, transitions, and audio cues without copying the script or look.
+- Use Claude's built-in voices if you are on the free plan of ElevenLabs, as library voices require a paid plan when accessed via the API.
+
+## Actionable Frameworks
+### Viral Video Machine
+An automated workflow combining Claude Opus 5.5, ElevenLabs, and HyperFrames to ingest scripts, fact-check against real sources, generate synchronized voiceovers, and produce complete motion-graphic videos without manual editing software.
+
+## Memorable Quotes
+> Instead I built a video machine inside Claude. You give it a topic and it hands you a finished video just like this Titanic one.
+
+> The real question isn't how much money you have, it's whether it's growing faster than prices.
+
+## Tags
+`#ai agents` `#automation` `#programming` `#video generation` `#startups`

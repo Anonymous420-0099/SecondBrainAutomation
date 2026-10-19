@@ -668,5 +668,15 @@
     "processed_at": "2026-10-13T04:12:21Z",
     "url": "https://www.youtube.com/watch?v=d_csri5M9xw",
     "note_path": "notes/2026/10/2026-10-13-how-to-build-a-faceless-channel-youtube-won-t-demonetize.md"
+  },
+  {
+    "video_id": "Aj5v78U3vm0",
+    "title": "I Turned Claude Opus 5.5 Into a Viral Video Machine (Here's How)",
+    "channel": "The Zinny Studio",
+    "category": "AI Systems",
+    "summary": "How to configure Claude Opus 5.5 with ElevenLabs and HyperFrames to automate the complete production of motion graphics videos from scratch.",
+    "processed_at": "2026-10-19T02:19:54Z",
+    "url": "https://www.youtube.com/watch?v=Aj5v78U3vm0",
+    "note_path": "notes/2026/10/2026-10-19-i-turned-claude-opus-5-5-into-a-viral-video-machine-here-s-how.md"
   }
 ]
