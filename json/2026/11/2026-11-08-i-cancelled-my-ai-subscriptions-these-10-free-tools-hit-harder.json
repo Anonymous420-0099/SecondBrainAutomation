@@ -1,0 +1,29 @@
+{
+  "video_id": "nQlzP8Yhujg",
+  "title": "I Cancelled My AI Subscriptions. These 10 Free Tools Hit Harder",
+  "channel": "Vaibhav Sisinty",
+  "url": "https://www.youtube.com/watch?v=nQlzP8Yhujg",
+  "processed_at": "2026-11-08T02:56:00Z",
+  "category": "AI Systems",
+  "one_sentence_summary": "A review of ten free, open-source AI tools that can replace expensive paid software subscriptions for coding, image generation, voice cloning, screen recording, and productivity.",
+  "key_takeaways": [
+    "Use Replica Recon and the Replica project to reverse engineer and rebuild fully functional versions of popular apps like Spotify using open AI tools.",
+    "Utilize Qwen-Image 2.1 through ComfyUI for free, high-quality local image and logo generation without subscriptions or limits.",
+    "Deploy VoiceStudio locally for unrestricted, high-quality voice cloning as a free alternative to paid tools like ElevenLabs.",
+    "Use Google AI Edge Foresight for offline, secure meeting transcription and note-taking directly on your Mac without sending data to the cloud.",
+    "Leverage ArtCraft and GenOffice for free, open-source alternatives to Adobe suites and Microsoft 365, running directly on your own machine."
+  ],
+  "actionable_frameworks": [],
+  "memorable_quotes": [
+    "Software belongs to you. The internet belongs to you. Everything you buy belongs to you.",
+    "We believe that you should have the final say in what you do with your property, and not Anthropic."
+  ],
+  "related_topics": [
+    "ai",
+    "open-source",
+    "automation",
+    "productivity",
+    "startups"
+  ],
+  "transcript": null
+}
